@@ -75,9 +75,7 @@ namespace TonjeConverter
 					String val1 = point.X.ToString ("##0.000");
 					String val2 = (point.Y - offsetVal).ToString ("##0.000");
 					writer.Write (val1);
-					for (int i = 0; i < (8 - val1.Length); i++) {
-						writer.Write (" ");
-					}
+					writer.Write ("\t");
 					writer.Write (val2);
 					writer.Write (writer.NewLine);
 				}
