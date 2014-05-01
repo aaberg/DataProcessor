@@ -23,7 +23,7 @@ namespace TonjeConverter
 			Console.WriteLine (String.Format ("Processing data from {0}", this.Data.InputFileName));
 			Console.WriteLine (String.Format ("Writing to file {0}", this.Data.OutputFileName));
 
-			List<DecPoint> dataPoints = new List<DecPoint> ();
+			List<decimal[]> dataPoints = new List<decimal[]> ();
 			decimal offsetVal = 0;
 
 			// read file
@@ -40,13 +40,17 @@ namespace TonjeConverter
 
 					String[] vals = line.Split ();
 					NumberFormatInfo formatInfo = CultureInfo.GetCultureInfo ("NB-no").NumberFormat;
-					decimal valx = decimal.Parse (vals [0], formatInfo);
-					decimal valy = decimal.Parse (vals [1], formatInfo);
 
-					dataPoints.Add (new DecPoint (valx, valy));
+					decimal[] decVals = new decimal[vals.Length];
+					for (int idx = 0; idx < vals.Length; idx ++) {
+						decVals [idx] = decimal.Parse (vals [idx], formatInfo);
+					}
 
-					if (valy < offsetVal)
-						offsetVal = valy;
+
+					dataPoints.Add (decVals);
+
+					if (decVals[decVals.Length-1] < offsetVal)
+						offsetVal = decVals[decVals.Length-1];
 				}
 			}
 
@@ -71,12 +75,19 @@ namespace TonjeConverter
 
 			// Write new file
 			using (StreamWriter writer = new StreamWriter(this.Data.OutputFileName, false, Encoding.UTF8)) {
-				foreach (DecPoint point in dataPoints) {
-					String val1 = point.X.ToString ("##0.000");
-					String val2 = (point.Y - offsetVal).ToString ("##0.000");
-					writer.Write (val1);
-					writer.Write ("\t");
-					writer.Write (val2);
+				foreach (decimal[] row in dataPoints) {
+					for (int idx = 0; idx < row.Length; idx++) {
+						decimal decVal = row [idx];
+						String tab = "\t";
+						if (idx == row.Length - 1) {
+							decVal = decVal - offsetVal;
+							tab = "";
+						}
+						String strVal = decVal.ToString ("##0.000");
+
+						writer.Write (strVal);
+						writer.Write (tab);
+					}
 					writer.Write (writer.NewLine);
 				}
 			}
